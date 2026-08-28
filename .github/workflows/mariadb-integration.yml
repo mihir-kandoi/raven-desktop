@@ -57,6 +57,8 @@ jobs:
         run: |
           yarn install --frozen-lockfile --ignore-scripts
           node node_modules/electron/install.js
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
       - name: Create MariaDB Bench
         run: |
           pip install frappe-bench
