@@ -4,7 +4,6 @@ import type { Rectangle } from "electron"
 import type {
   Appearance,
   DesktopPreferences,
-  RailDensity,
   RavenSite,
   StoredDesktopState,
 } from "./types.js"
@@ -12,7 +11,6 @@ import { createSiteID, normalizeSiteOrigin } from "./security.js"
 
 const DEFAULT_PREFERENCES: DesktopPreferences = {
   appearance: "system",
-  railDensity: "comfortable",
 }
 
 export class SiteStore {
@@ -61,11 +59,6 @@ export class SiteStore {
     await this.save()
   }
 
-  public async setRailDensity(railDensity: RailDensity): Promise<void> {
-    this.state.preferences.railDensity = railDensity
-    await this.save()
-  }
-
   public async setContentOrigin(siteID: string, contentOrigin: string): Promise<void> {
     const site = this.state.sites.find(({ id }) => id === siteID)
     if (!site) return
@@ -110,9 +103,8 @@ const parseStoredState = (value: unknown): StoredDesktopState => {
 const parsePreferences = (value: unknown): DesktopPreferences => {
   if (!isRecord(value)) return { ...DEFAULT_PREFERENCES }
   const appearance = isAppearance(value.appearance) ? value.appearance : "system"
-  const railDensity = isRailDensity(value.railDensity) ? value.railDensity : "comfortable"
   const windowBounds = isRectangle(value.windowBounds) ? value.windowBounds : undefined
-  return { appearance, railDensity, windowBounds }
+  return { appearance, windowBounds }
 }
 
 const isRavenSite = (value: unknown): value is RavenSite => {
@@ -137,5 +129,4 @@ const isRectangle = (value: unknown): value is Rectangle => isRecord(value)
   && [value.x, value.y, value.width, value.height].every((field) => typeof field === "number")
 
 const isAppearance = (value: unknown): value is Appearance => ["system", "light", "dark"].includes(String(value))
-const isRailDensity = (value: unknown): value is RailDensity => ["compact", "comfortable"].includes(String(value))
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null

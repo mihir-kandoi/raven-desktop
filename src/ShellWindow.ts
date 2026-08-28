@@ -17,7 +17,6 @@ import { visibleWindowBounds } from "./windowBounds.js"
 import type {
   Appearance,
   DeepLinkTarget,
-  RailDensity,
   RavenSite,
   ShellState,
   SiteRuntimeState,
@@ -30,7 +29,6 @@ const IPC_CHANNELS = [
   "shell:remove-site",
   "shell:set-manager-open",
   "shell:set-appearance",
-  "shell:set-rail-density",
 ] as const
 
 export class ShellWindow {
@@ -214,7 +212,6 @@ export class ShellWindow {
     this.handleIPC("shell:remove-site", (_event, siteID: string) => this.removeSite(siteID))
     this.handleIPC("shell:set-manager-open", (_event, open: boolean) => this.setManagerOpen(open))
     this.handleIPC("shell:set-appearance", (_event, value: Appearance) => this.setAppearance(value))
-    this.handleIPC("shell:set-rail-density", (_event, value: RailDensity) => this.setRailDensity(value))
   }
 
   private handleIPC<Arguments extends unknown[], Result>(
@@ -280,22 +277,12 @@ export class ShellWindow {
     this.publishState()
   }
 
-  private async setRailDensity(density: RailDensity): Promise<void> {
-    if (!["compact", "comfortable"].includes(density)) return
-    await this.siteStore.setRailDensity(density)
-    this.layout()
-    this.publishState()
-  }
-
   private layout(): void {
     const size = this.window.getContentSize()
-    const state = this.siteStore.snapshot()
     const layout = calculateShellLayout({
       width: size[0] ?? 900,
       height: size[1] ?? 600,
       managerOpen: this.managerOpen,
-      railDensity: state.preferences.railDensity,
-      siteCount: state.sites.length,
     })
     this.shellView.setBounds(layout.shellBounds)
     this.shellView.setVisible(layout.shellVisible)

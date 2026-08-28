@@ -290,10 +290,10 @@ export class ElectronSmokeApplication {
       const state = await this.getShellState(shellContents)
       return state.managerOpen ? state : undefined
     }, "The site manager did not open.")
-    const railHidden = await shellContents.executeJavaScript(
-      "getComputedStyle(document.querySelector('.site-rail')).display === 'none'",
+    const railRemoved = await shellContents.executeJavaScript(
+      "document.querySelector('.site-rail') === null",
     ) as boolean
-    assert.equal(railHidden, true)
+    assert.equal(railRemoved, true)
     const siteSelector = `#saved-site-list [data-action="select-site"][data-site-id="${site.id}"]`
     await shellContents.executeJavaScript(
       `document.querySelector(${JSON.stringify(siteSelector)}).click()`,

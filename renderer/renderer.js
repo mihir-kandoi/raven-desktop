@@ -3,7 +3,6 @@ class ShellRenderer {
     this.bridge = bridge
     this.state = null
     this.shell = document.querySelector("#shell")
-    this.siteButtons = document.querySelector("#site-buttons")
     this.savedSiteList = document.querySelector("#saved-site-list")
     this.siteForm = document.querySelector("#site-form")
     this.siteInput = document.querySelector("#site-url")
@@ -21,23 +20,10 @@ class ShellRenderer {
   render(state) {
     this.state = state
     document.documentElement.dataset.theme = state.preferences.appearance
-    document.documentElement.dataset.density = state.preferences.railDensity
     this.shell.classList.toggle("manager-open", state.managerOpen)
     this.shell.classList.toggle("no-sites", state.sites.length === 0)
-    this.shell.classList.toggle("rail-hidden", state.sites.length <= 1)
-    this.renderSiteButtons()
     this.renderSavedSites()
     this.renderSettings()
-  }
-
-  renderSiteButtons() {
-    this.siteButtons.replaceChildren(...this.state.sites.map((site) => {
-      const button = this.button("site-button", site.name, "select-site", site.id)
-      button.setAttribute("aria-current", String(site.id === this.state.activeSiteID))
-      button.setAttribute("aria-label", site.name)
-      button.replaceChildren(this.siteIcon(site), this.statusDot(site), ...this.badge(site))
-      return button
-    }))
   }
 
   renderSavedSites() {
@@ -49,9 +35,7 @@ class ShellRenderer {
 
   renderSettings() {
     document.querySelectorAll("[data-setting]").forEach((control) => {
-      const setting = control.dataset.setting === "appearance"
-        ? this.state.preferences.appearance
-        : this.state.preferences.railDensity
+      const setting = this.state.preferences.appearance
       control.querySelectorAll("button").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.value === setting))
       })
@@ -95,22 +79,6 @@ class ShellRenderer {
     return image
   }
 
-  statusDot(site) {
-    const dot = document.createElement("span")
-    dot.className = "status-dot"
-    dot.dataset.status = this.state.runtimeBySite[site.id]?.status ?? "idle"
-    return dot
-  }
-
-  badge(site) {
-    const count = this.state.runtimeBySite[site.id]?.unreadCount ?? 0
-    if (!count) return []
-    const badge = document.createElement("span")
-    badge.className = "site-badge"
-    badge.textContent = count > 99 ? "99+" : String(count)
-    return [badge]
-  }
-
   button(className, label, action, siteID) {
     const button = document.createElement("button")
     button.type = "button"
@@ -133,7 +101,6 @@ class ShellRenderer {
 
     const setting = button.closest("[data-setting]")?.dataset.setting
     if (setting === "appearance") return this.bridge.setAppearance(button.dataset.value)
-    if (setting === "rail-density") return this.bridge.setRailDensity(button.dataset.value)
   }
 
   async addSite(event) {

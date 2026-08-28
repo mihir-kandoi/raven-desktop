@@ -1,7 +1,6 @@
 import type { Rectangle } from "electron"
 
 export type Appearance = "system" | "light" | "dark"
-export type RailDensity = "compact" | "comfortable"
 export type SiteStatus = "idle" | "loading" | "ready" | "error"
 
 export interface RavenSite {
@@ -15,7 +14,6 @@ export interface RavenSite {
 
 export interface DesktopPreferences {
   appearance: Appearance
-  railDensity: RailDensity
   windowBounds?: Rectangle
 }
 
@@ -42,7 +40,6 @@ export interface DesktopBridge {
   removeSite(siteID: string): Promise<void>
   setManagerOpen(open: boolean): Promise<void>
   setAppearance(appearance: Appearance): Promise<void>
-  setRailDensity(density: RailDensity): Promise<void>
   onStateChanged(callback: (state: ShellState) => void): () => void
 }
 

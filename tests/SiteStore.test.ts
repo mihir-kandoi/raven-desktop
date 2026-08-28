@@ -21,13 +21,12 @@ afterEach(async () => {
 })
 
 describe("SiteStore", () => {
-  it("persists sites, selection, preferences, and window bounds", async () => {
+  it("persists sites, selection, appearance, and window bounds", async () => {
     const statePath = await createStatePath()
     const store = new SiteStore(statePath)
     await store.load()
     await store.addSite(site)
     await store.setAppearance("dark")
-    await store.setRailDensity("compact")
     await store.setWindowBounds({ x: 10, y: 20, width: 1200, height: 800 })
 
     const restored = new SiteStore(statePath)
@@ -37,7 +36,6 @@ describe("SiteStore", () => {
       activeSiteID: site.id,
       preferences: {
         appearance: "dark",
-        railDensity: "compact",
         windowBounds: { x: 10, y: 20, width: 1200, height: 800 },
       },
     })
@@ -52,8 +50,21 @@ describe("SiteStore", () => {
     expect(store.snapshot()).toEqual({
       sites: [],
       activeSiteID: null,
-      preferences: { appearance: "system", railDensity: "comfortable" },
+      preferences: { appearance: "system" },
     })
+  })
+
+  it("removes the legacy rail preference from stored state", async () => {
+    const statePath = await createStatePath()
+    await writeFile(statePath, JSON.stringify({
+      sites: [site],
+      activeSiteID: site.id,
+      preferences: { appearance: "dark", railDensity: "compact" },
+    }))
+    const store = new SiteStore(statePath)
+    await store.load()
+
+    expect(store.snapshot().preferences).toEqual({ appearance: "dark" })
   })
 
   it("filters sites with unsafe or forged origins", async () => {
