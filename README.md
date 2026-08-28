@@ -2,23 +2,22 @@
 
 Raven Desktop puts one or more Raven sites in one native window. Each site keeps a separate login session.
 
-## Raven source link
+## Raven test revision
 
-The `raven` directory is a Git submodule. It points to the `develop` branch of [`mihir-kandoi/raven`](https://github.com/mihir-kandoi/raven). That repository is a fork of [`frappe/raven`](https://github.com/frappe/raven).
+The desktop app loads Raven from each configured Frappe site. It does not bundle Raven source code.
 
-The submodule pins one Raven commit. This makes each desktop build and integration test reproducible.
+[`raven.ref`](raven.ref) pins the [`mihir-kandoi/raven`](https://github.com/mihir-kandoi/raven) revision used by integration tests. CI checks out that revision temporarily.
 
-Clone both repositories with this command:
+Clone the desktop repository with this command:
 
 ```sh
-git clone --recurse-submodules https://github.com/mihir-kandoi/raven-desktop.git
+git clone https://github.com/mihir-kandoi/raven-desktop.git
 ```
 
-Update the pinned Raven commit with these commands:
+To update the tested Raven revision, replace the SHA in `raven.ref` and commit the change:
 
 ```sh
-yarn raven:update
-git add raven
+git add raven.ref
 git commit -m "chore: update Raven"
 ```
 
@@ -56,7 +55,7 @@ yarn test:electron
 
 The integration test starts the real Electron shell. It checks authentication, session isolation, renderer security, and realtime notification delivery.
 
-The `MariaDB integration` GitHub workflow creates the Bench from `raven`. It runs Raven tests and the Electron integration test.
+The `MariaDB integration` workflow checks out the revision in `raven.ref`. It runs Raven tests and the Electron integration test.
 
 ## Desktop behavior
 
@@ -64,7 +63,7 @@ The `MariaDB integration` GitHub workflow creates the Bench from `raven`. It run
 - Remote pages run with Node.js disabled and the Chromium sandbox enabled.
 - External web, email, and telephone links open in the default system app.
 - The tray menu and application badge show unread activity.
-- The app saves its window bounds, theme, rail density, sites, and active site.
+- The app saves its window bounds, theme, sites, and active site.
 - A `raven://open` link can open a Raven route.
 
 ## Release packages

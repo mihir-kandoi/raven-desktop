@@ -3,7 +3,7 @@ name: Release on Raven update
 on:
   push:
     branches: [main]
-    paths: [raven]
+    paths: [raven.ref]
   workflow_dispatch:
     inputs:
       publish:
@@ -30,15 +30,14 @@ jobs:
       release_version: ${{ steps.release.outputs.release_version }}
     steps:
       - uses: actions/checkout@v7
-        with:
-          submodules: recursive
       - id: release
         name: Set release metadata
         shell: bash
         run: |
           desktop_version="$(node --print "require('./package.json').version")"
           base_version="${desktop_version%%[-+]*}"
-          raven_sha="$(git -C raven rev-parse HEAD)"
+          raven_sha="$(tr -d '[:space:]' < raven.ref)"
+          [[ "$raven_sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
           raven_short_sha="${raven_sha:0:8}"
           release_version="${base_version}-raven.${raven_short_sha}.${GITHUB_RUN_NUMBER}"
           {

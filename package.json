@@ -19,7 +19,6 @@
     "package": "yarn build && electron-forge package",
     "package:mac:local": "RAVEN_MACOS_SIGNING_IDENTITY='Raven Desktop Local' yarn package",
     "make": "yarn build && electron-forge make",
-    "raven:update": "git submodule update --remote raven",
     "test": "vitest run --dir tests",
     "test:electron": "yarn build && node scripts/run-electron-smoke.cjs"
   },

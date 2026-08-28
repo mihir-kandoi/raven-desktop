@@ -3,7 +3,7 @@ name: Desktop
 on:
   push:
     branches: [main]
-    paths-ignore: [raven]
+    paths-ignore: [raven.ref]
   pull_request:
 
 permissions:
