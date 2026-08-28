@@ -7,6 +7,7 @@ import {
 } from "electron"
 import type { IpcMainInvokeEvent } from "electron"
 import { ApplicationMenu } from "./ApplicationMenu.js"
+import { calculateShellLayout } from "./shellLayout.js"
 import { SiteDiscovery } from "./SiteDiscovery.js"
 import { SiteStore } from "./SiteStore.js"
 import { SiteViewManager } from "./SiteViewManager.js"
@@ -288,14 +289,18 @@ export class ShellWindow {
 
   private layout(): void {
     const size = this.window.getContentSize()
-    const width = size[0] ?? 900
-    const height = size[1] ?? 600
-    const railWidth = this.siteStore.snapshot().preferences.railDensity === "compact" ? 64 : 76
-    const shellWidth = this.managerOpen ? width : railWidth
-    this.shellView.setBounds({ x: 0, y: 0, width: shellWidth, height })
-    this.shellView.setVisible(true)
-    if (this.managerOpen) return this.siteViews.hideAll()
-    this.siteViews.setBounds({ x: railWidth, y: 0, width: width - railWidth, height })
+    const state = this.siteStore.snapshot()
+    const layout = calculateShellLayout({
+      width: size[0] ?? 900,
+      height: size[1] ?? 600,
+      managerOpen: this.managerOpen,
+      railDensity: state.preferences.railDensity,
+      siteCount: state.sites.length,
+    })
+    this.shellView.setBounds(layout.shellBounds)
+    this.shellView.setVisible(layout.shellVisible)
+    if (layout.hideSites) return this.siteViews.hideAll()
+    this.siteViews.setBounds(layout.siteBounds)
   }
 
   private buildState(): ShellState {

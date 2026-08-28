@@ -54,6 +54,10 @@ input:focus-visible {
   border-right: 1px solid var(--outline);
 }
 
+.rail-hidden .site-rail {
+  display: none;
+}
+
 .brand-button,
 .site-button,
 .icon-button {

@@ -24,6 +24,7 @@ class ShellRenderer {
     document.documentElement.dataset.density = state.preferences.railDensity
     this.shell.classList.toggle("manager-open", state.managerOpen)
     this.shell.classList.toggle("no-sites", state.sites.length === 0)
+    this.shell.classList.toggle("rail-hidden", state.sites.length <= 1)
     this.renderSiteButtons()
     this.renderSavedSites()
     this.renderSettings()

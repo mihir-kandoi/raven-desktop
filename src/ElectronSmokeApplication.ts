@@ -100,7 +100,7 @@ export class ElectronSmokeApplication {
     await this.authenticate(ravenContents)
     await this.assertRaven(ravenContents, site)
     await this.assertDesktopNotifications(ravenContents, site)
-    await this.assertSiteButton(shellContents, ravenContents, site)
+    await this.assertSingleSiteLayout(shellContents, ravenContents, site)
     this.failures.assertClean()
   }
 
@@ -280,20 +280,23 @@ export class ElectronSmokeApplication {
     )`)
   }
 
-  private async assertSiteButton(
+  private async assertSingleSiteLayout(
     shellContents: WebContents,
     ravenContents: WebContents,
     site: RavenSite,
   ): Promise<void> {
-    await shellContents.executeJavaScript(
-      "document.querySelector('[data-action=\"show-manager\"]').click()",
-    )
+    this.shellWindow?.openManager()
     await waitFor(async () => {
       const state = await this.getShellState(shellContents)
       return state.managerOpen ? state : undefined
     }, "The site manager did not open.")
+    const railHidden = await shellContents.executeJavaScript(
+      "getComputedStyle(document.querySelector('.site-rail')).display === 'none'",
+    ) as boolean
+    assert.equal(railHidden, true)
+    const siteSelector = `#saved-site-list [data-action="select-site"][data-site-id="${site.id}"]`
     await shellContents.executeJavaScript(
-      `document.querySelector('[data-action="select-site"][data-site-id="${site.id}"]').click()`,
+      `document.querySelector(${JSON.stringify(siteSelector)}).click()`,
     )
     const state = await waitFor(async () => {
       const nextState = await this.getShellState(shellContents)
@@ -301,16 +304,7 @@ export class ElectronSmokeApplication {
     }, "The Raven site button did not select the site.")
     assert.equal(state.activeSiteID, site.id)
     assert.equal(safeUrl(ravenContents.getURL())?.origin, site.origin)
-    const iconUrl = await shellContents.executeJavaScript(
-      `document.querySelector('[data-site-id="${site.id}"] img').src`,
-    ) as string
-    assert.equal(safeUrl(iconUrl)?.protocol, "raven-shell:")
-    const hasTextNode = await shellContents.executeJavaScript(
-      `Array.from(document.querySelector('[data-site-id="${site.id}"]').childNodes)
-        .some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim())`,
-    ) as boolean
-    assert.equal(hasTextNode, false)
-    report("Raven site button stayed inside the desktop window")
+    report("Single-site Raven uses the full desktop window without a site rail")
   }
 
   private getShellState(contents: WebContents): Promise<ShellState> {
