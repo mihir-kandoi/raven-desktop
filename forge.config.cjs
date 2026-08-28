@@ -29,7 +29,7 @@ module.exports = {
     appBundleId: "com.thecommitcompany.raven",
     appCategoryType: "public.app-category.social-networking",
     osxSign: {
-      identity: "-",
+      identity: process.env.RAVEN_MACOS_SIGNING_IDENTITY || "-",
       identityValidation: false,
       optionsForFile: () => ({
         hardenedRuntime: false,
