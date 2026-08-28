@@ -90,7 +90,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y rpm
       - name: Rebuild macOS maker dependencies
         if: matrix.platform == 'macos'
-        run: npm rebuild macos-alias
+        run: npm rebuild fs-xattr macos-alias
+      - name: Rebuild Windows maker dependencies
+        if: matrix.platform == 'windows'
+        run: npm rebuild electron-winstaller
       - name: Build installers
         run: yarn make
       - name: Upload installers
