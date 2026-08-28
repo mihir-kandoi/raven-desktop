@@ -2,23 +2,16 @@
 
 Raven Desktop puts one or more Raven sites in one native window. Each site keeps a separate login session.
 
-## Raven test revision
+## Raven compatibility
 
 The desktop app loads Raven from each configured Frappe site. It does not bundle Raven source code.
 
-[`raven.ref`](raven.ref) pins the [`mihir-kandoi/raven`](https://github.com/mihir-kandoi/raven) revision used by integration tests. CI checks out that revision temporarily.
+The MariaDB integration workflow checks out the current `develop` branch from [`mihir-kandoi/raven`](https://github.com/mihir-kandoi/raven). It tests that Raven revision against Electron without storing Raven in this repository.
 
 Clone the desktop repository with this command:
 
 ```sh
 git clone https://github.com/mihir-kandoi/raven-desktop.git
-```
-
-To update the tested Raven revision, replace the SHA in `raven.ref` and commit the change:
-
-```sh
-git add raven.ref
-git commit -m "chore: update Raven"
 ```
 
 ## Run the app
@@ -55,7 +48,7 @@ yarn test:electron
 
 The integration test starts the real Electron shell. It checks authentication, session isolation, renderer security, and realtime notification delivery.
 
-The `MariaDB integration` workflow checks out the revision in `raven.ref`. It runs Raven tests and the Electron integration test.
+The `MariaDB integration` workflow runs Raven tests and the Electron integration test against the current Raven `develop` branch.
 
 ## Desktop behavior
 
@@ -68,7 +61,7 @@ The `MariaDB integration` workflow checks out the revision in `raven.ref`. It ru
 
 ## Release packages
 
-Electron Forge packages the app for macOS, Windows, and Linux. Public releases require platform signing credentials.
+Electron Forge packages the app for macOS, Windows, and Linux. Desktop code changes on `main` publish a release automatically.
 
 ## License
 

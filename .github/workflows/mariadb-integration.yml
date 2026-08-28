@@ -40,15 +40,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - id: raven-ref
-        name: Read Raven revision
-        shell: bash
-        run: echo "revision=$(tr -d '[:space:]' < raven.ref)" >> "$GITHUB_OUTPUT"
       - name: Checkout Raven test source
         uses: actions/checkout@v4
         with:
           repository: mihir-kandoi/raven
-          ref: ${{ steps.raven-ref.outputs.revision }}
+          ref: develop
           path: raven
       - uses: actions/setup-python@v5
         with:

@@ -1,13 +1,20 @@
-name: Release on Raven update
+name: Release desktop
 
 on:
   push:
     branches: [main]
-    paths: [raven.ref]
+    paths:
+      - assets/**
+      - renderer/**
+      - src/**
+      - forge.config.cjs
+      - package.json
+      - yarn.lock
+      - tsconfig.json
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish the test build as a release
+        description: Publish the desktop build as a release
         type: boolean
         default: false
 
@@ -23,8 +30,8 @@ jobs:
     name: Prepare release
     runs-on: ubuntu-latest
     outputs:
-      raven_sha: ${{ steps.release.outputs.raven_sha }}
-      raven_short_sha: ${{ steps.release.outputs.raven_short_sha }}
+      desktop_sha: ${{ steps.release.outputs.desktop_sha }}
+      desktop_short_sha: ${{ steps.release.outputs.desktop_short_sha }}
       release_name: ${{ steps.release.outputs.release_name }}
       release_tag: ${{ steps.release.outputs.release_tag }}
       release_version: ${{ steps.release.outputs.release_version }}
@@ -36,13 +43,12 @@ jobs:
         run: |
           desktop_version="$(node --print "require('./package.json').version")"
           base_version="${desktop_version%%[-+]*}"
-          raven_sha="$(tr -d '[:space:]' < raven.ref)"
-          [[ "$raven_sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
-          raven_short_sha="${raven_sha:0:8}"
-          release_version="${base_version}-raven.${raven_short_sha}.${GITHUB_RUN_NUMBER}"
+          desktop_sha="$GITHUB_SHA"
+          desktop_short_sha="${desktop_sha:0:8}"
+          release_version="${base_version}-desktop.${desktop_short_sha}.${GITHUB_RUN_NUMBER}"
           {
-            echo "raven_sha=${raven_sha}"
-            echo "raven_short_sha=${raven_short_sha}"
+            echo "desktop_sha=${desktop_sha}"
+            echo "desktop_short_sha=${desktop_short_sha}"
             echo "release_name=Raven Desktop ${release_version}"
             echo "release_tag=v${release_version}"
             echo "release_version=${release_version}"
@@ -136,14 +142,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RAVEN_SHA: ${{ needs.metadata.outputs.raven_sha }}
-          RAVEN_SHORT_SHA: ${{ needs.metadata.outputs.raven_short_sha }}
+          DESKTOP_SHA: ${{ needs.metadata.outputs.desktop_sha }}
+          DESKTOP_SHORT_SHA: ${{ needs.metadata.outputs.desktop_short_sha }}
           RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
           RELEASE_TAG: ${{ needs.metadata.outputs.release_tag }}
         shell: bash
         run: |
           cat > "$RUNNER_TEMP/release-notes.md" <<EOF
-          This release uses Raven commit [\`${RAVEN_SHORT_SHA}\`](https://github.com/mihir-kandoi/raven/commit/${RAVEN_SHA}).
+          This release contains desktop commit [\`${DESKTOP_SHORT_SHA}\`](https://github.com/mihir-kandoi/raven-desktop/commit/${DESKTOP_SHA}).
 
           Downloads:
 
