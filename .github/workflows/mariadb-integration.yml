@@ -51,7 +51,7 @@ jobs:
           cache: yarn
       - name: Install system dependencies
         run: |
-          bash vendor/raven/.github/helper/install_dependencies.sh
+          bash raven/.github/helper/install_dependencies.sh
           sudo apt-get install -y xvfb
       - name: Install desktop dependencies
         run: |
@@ -70,7 +70,7 @@ jobs:
         env:
           CI: "Yes"
         run: |
-          bench get-app raven "$GITHUB_WORKSPACE/vendor/raven"
+          bench get-app raven "$GITHUB_WORKSPACE/raven"
           bench setup requirements --dev
           bench new-site raven-test.localhost --db-root-password root --admin-password admin
           bench --site raven-test.localhost install-app raven

@@ -1,4 +1,4 @@
-[submodule "vendor/raven"]
-	path = vendor/raven
+[submodule "raven"]
+	path = raven
 	url = https://github.com/mihir-kandoi/raven.git
 	branch = develop

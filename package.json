@@ -18,6 +18,7 @@
     "start": "yarn build && electron-forge start",
     "package": "yarn build && electron-forge package",
     "make": "yarn build && electron-forge make",
+    "raven:update": "git submodule update --remote raven",
     "test": "vitest run --dir tests",
     "test:electron": "yarn build && node scripts/run-electron-smoke.cjs"
   },

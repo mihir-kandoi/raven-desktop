@@ -4,7 +4,7 @@ Raven Desktop puts one or more Raven sites in one native window. Each site keeps
 
 ## Raven source link
 
-The `vendor/raven` Git submodule points to the `develop` branch of [`mihir-kandoi/raven`](https://github.com/mihir-kandoi/raven). That repository is a fork of [`frappe/raven`](https://github.com/frappe/raven).
+The `raven` directory is a Git submodule. It points to the `develop` branch of [`mihir-kandoi/raven`](https://github.com/mihir-kandoi/raven). That repository is a fork of [`frappe/raven`](https://github.com/frappe/raven).
 
 The submodule pins one Raven commit. This makes each desktop build and integration test reproducible.
 
@@ -17,8 +17,8 @@ git clone --recurse-submodules https://github.com/mihir-kandoi/raven-desktop.git
 Update the pinned Raven commit with these commands:
 
 ```sh
-git submodule update --remote vendor/raven
-git add vendor/raven
+yarn raven:update
+git add raven
 git commit -m "chore: update Raven"
 ```
 
@@ -56,7 +56,7 @@ yarn test:electron
 
 The integration test starts the real Electron shell. It checks authentication, session isolation, renderer security, and realtime notification delivery.
 
-The `MariaDB integration` GitHub workflow creates the Bench from `vendor/raven`. It runs Raven tests and the Electron integration test.
+The `MariaDB integration` GitHub workflow creates the Bench from `raven`. It runs Raven tests and the Electron integration test.
 
 ## Desktop behavior
 
