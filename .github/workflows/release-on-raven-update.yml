@@ -85,11 +85,12 @@ jobs:
           cache: yarn
       - run: yarn install --frozen-lockfile --ignore-scripts
       - run: node node_modules/electron/install.js
-      - name: Set application version
-        env:
-          RELEASE_VERSION: ${{ needs.metadata.outputs.release_version }}
-        shell: bash
-        run: npm version "$RELEASE_VERSION" --no-git-tag-version
+      - name: Install Linux maker dependencies
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - name: Rebuild macOS maker dependencies
+        if: matrix.platform == 'macos'
+        run: npm rebuild macos-alias
       - name: Build installers
         run: yarn make
       - name: Upload installers

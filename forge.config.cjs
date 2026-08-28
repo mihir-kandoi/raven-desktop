@@ -57,12 +57,12 @@ module.exports = {
     {
       name: "@electron-forge/maker-deb",
       platforms: ["linux"],
-      config: { options: { categories: ["Network", "Chat"] } },
+      config: { options: { bin: "Raven", categories: ["Network", "Chat"] } },
     },
     {
       name: "@electron-forge/maker-rpm",
       platforms: ["linux"],
-      config: { options: { categories: ["Network", "Chat"] } },
+      config: { options: { bin: "Raven", categories: ["Network", "Chat"] } },
     },
   ],
   plugins: [
