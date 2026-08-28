@@ -136,6 +136,7 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           RAVEN_SHA: ${{ needs.metadata.outputs.raven_sha }}
           RAVEN_SHORT_SHA: ${{ needs.metadata.outputs.raven_short_sha }}
           RELEASE_NAME: ${{ needs.metadata.outputs.release_name }}
