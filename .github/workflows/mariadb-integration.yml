@@ -76,6 +76,7 @@ jobs:
           bench --site raven-test.localhost install-app raven
           bench --site raven-test.localhost set-config allow_tests true
           bench build
+          bench --site raven-test.localhost execute raven.api.search.rebuild_search_index
       - name: Run Raven tests
         id: raven-tests
         continue-on-error: true
