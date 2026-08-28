@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Raven</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="manager.css" />
+    <script type="module" src="renderer.js"></script>
+  </head>
+  <body>
+    <div id="shell" class="shell">
+      <nav class="site-rail" aria-label="Raven sites">
+        <button class="brand-button" type="button" data-action="show-manager" aria-label="Manage Raven sites">
+          <img src="raven.svg" alt="" />
+        </button>
+        <div id="site-buttons" class="site-buttons"></div>
+        <div class="rail-spacer"></div>
+        <button class="icon-button" type="button" data-action="show-manager" aria-label="Add or manage sites">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </button>
+      </nav>
+
+      <main id="manager" class="manager">
+        <div class="manager-content">
+          <header class="manager-header">
+            <div>
+              <span class="eyebrow">Raven desktop</span>
+              <h1>Your work, one window.</h1>
+              <p>Add each Raven site that you use. Raven keeps its login and notifications separate.</p>
+            </div>
+            <button id="close-manager" class="icon-button close-button" type="button" data-action="close-manager" aria-label="Close site manager">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+          </header>
+
+          <section class="add-site" aria-labelledby="add-site-heading">
+            <div class="section-heading">
+              <h2 id="add-site-heading">Add a Raven site</h2>
+              <p>Use the address that opens Raven in your browser.</p>
+            </div>
+            <form id="site-form" class="site-form">
+              <label for="site-url">Site address</label>
+              <div class="input-row">
+                <input id="site-url" name="site-url" type="text" inputmode="url" autocomplete="url" placeholder="raven.example.com" required />
+                <button id="add-site-button" class="primary-button" type="submit">Add site</button>
+              </div>
+              <p id="form-message" class="form-message" role="status"></p>
+            </form>
+          </section>
+
+          <section class="saved-sites" aria-labelledby="saved-sites-heading">
+            <div class="section-heading">
+              <h2 id="saved-sites-heading">Saved sites</h2>
+              <p id="saved-sites-caption">Choose a site to open it.</p>
+            </div>
+            <div id="saved-site-list" class="saved-site-list"></div>
+          </section>
+        </div>
+
+        <aside class="tweak-panel" aria-label="Tweak desktop appearance">
+          <span class="tweak-title">Tweak</span>
+          <div class="tweak-control">
+            <span>Appearance</span>
+            <div class="segmented-control" data-setting="appearance">
+              <button type="button" data-value="system">System</button>
+              <button type="button" data-value="light">Light</button>
+              <button type="button" data-value="dark">Dark</button>
+            </div>
+          </div>
+          <div class="tweak-control">
+            <span>Site rail</span>
+            <div class="segmented-control" data-setting="rail-density">
+              <button type="button" data-value="compact">Compact</button>
+              <button type="button" data-value="comfortable">Relaxed</button>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>

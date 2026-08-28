@@ -1,0 +1,102 @@
+name: MariaDB integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Raven and Electron
+    runs-on: ubuntu-latest
+    services:
+      redis-cache:
+        image: redis:alpine
+        ports:
+          - 13000:6379
+      redis-queue:
+        image: redis:alpine
+        ports:
+          - 11000:6379
+      redis-socketio:
+        image: redis:alpine
+        ports:
+          - 12000:6379
+      mariadb:
+        image: anandology/mariadb-utf8mb4:10.3
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+      - name: Install system dependencies
+        run: |
+          bash vendor/raven/.github/helper/install_dependencies.sh
+          sudo apt-get install -y xvfb
+      - name: Install desktop dependencies
+        run: |
+          yarn install --frozen-lockfile --ignore-scripts
+          node node_modules/electron/install.js
+      - name: Create MariaDB Bench
+        run: |
+          pip install frappe-bench
+          bench init --skip-redis-config-generation --skip-assets --python "$(command -v python)" ~/frappe-bench
+          mysql --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'"
+          mysql --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+      - name: Install Raven
+        working-directory: /home/runner/frappe-bench
+        env:
+          CI: "Yes"
+        run: |
+          bench get-app raven "$GITHUB_WORKSPACE/vendor/raven"
+          bench setup requirements --dev
+          bench new-site raven-test.localhost --db-root-password root --admin-password admin
+          bench --site raven-test.localhost install-app raven
+          bench --site raven-test.localhost set-config allow_tests true
+          bench build
+      - name: Run Raven tests
+        working-directory: /home/runner/frappe-bench
+        env:
+          TYPE: server
+        run: bench --site raven-test.localhost run-tests --app raven
+      - name: Start Bench
+        working-directory: /home/runner/frappe-bench
+        run: |
+          nohup bench start > /tmp/raven-bench.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://raven-test.localhost:8000/login > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/raven-bench.log
+          exit 1
+      - name: Run Electron integration test
+        env:
+          RAVEN_TEST_SITE_ORIGIN: http://raven-test.localhost:8000
+          RAVEN_TEST_USER: Administrator
+          RAVEN_TEST_PASSWORD: admin
+        run: xvfb-run --auto-servernum yarn test:electron
+      - name: Show Bench log on failure
+        if: failure()
+        run: cat /tmp/raven-bench.log || true

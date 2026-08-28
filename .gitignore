@@ -1,0 +1,6 @@
+.DS_Store
+.desktop-build/
+node_modules/
+out/
+coverage/
+*.log
