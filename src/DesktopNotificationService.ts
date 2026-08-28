@@ -55,7 +55,7 @@ interface MessageResponse {
 const CHANNEL_REFRESH_INTERVAL = 60_000
 
 export class DesktopNotificationService {
-  private readonly subscribedChannels = new Set<string>()
+  private readonly channelSubscriptions = new NotificationChannelSubscriptions()
   private currentUser = ""
   private origin = ""
   private receivedMessageCount = 0
@@ -83,7 +83,7 @@ export class DesktopNotificationService {
     this.refreshTimer = undefined
     this.socket?.disconnect()
     this.socket = undefined
-    this.subscribedChannels.clear()
+    this.channelSubscriptions.clear()
   }
 
   public isConnected(): boolean {
@@ -91,7 +91,7 @@ export class DesktopNotificationService {
   }
 
   public isReady(): boolean {
-    return this.isConnected() && this.subscribedChannels.size > 0
+    return this.isConnected() && this.channelSubscriptions.size > 0
   }
 
   public hasReceivedMessage(): boolean {
@@ -116,7 +116,10 @@ export class DesktopNotificationService {
     const socket = await this.createSocket(sessionDetails)
     if (!socket || this.contents.isDestroyed()) return
     this.socket = socket
-    socket.on("connect", () => this.refreshChannels())
+    socket.on("connect", () => {
+      this.channelSubscriptions.clear()
+      this.refreshChannels()
+    })
     socket.on("channel_list_updated", () => this.refreshChannels())
     socket.on("message_created", (event: MessageCreatedEvent) => {
       this.receivedMessageCount += 1
@@ -148,12 +151,11 @@ export class DesktopNotificationService {
   private async updateChannels(): Promise<void> {
     if (!this.socket?.connected) return
     const channels = await this.fetchNotificationChannels()
-    for (const channelID of channels) {
-      if (!this.subscribedChannels.has(channelID)) this.subscribe(channelID)
-    }
-    for (const channelID of this.subscribedChannels) {
-      if (!channels.has(channelID)) this.unsubscribe(channelID)
-    }
+    this.channelSubscriptions.sync(
+      channels,
+      (channelID) => this.subscribe(channelID),
+      (channelID) => this.unsubscribe(channelID),
+    )
   }
 
   private async fetchNotificationChannels(): Promise<Set<string>> {
@@ -168,12 +170,10 @@ export class DesktopNotificationService {
 
   private subscribe(channelID: string): void {
     this.socket?.emit("doc_subscribe", "Raven Channel", channelID)
-    this.subscribedChannels.add(channelID)
   }
 
   private unsubscribe(channelID: string): void {
     this.socket?.emit("doc_unsubscribe", "Raven Channel", channelID)
-    this.subscribedChannels.delete(channelID)
   }
 
   private async notify(event: MessageCreatedEvent): Promise<void> {
@@ -229,6 +229,35 @@ export class DesktopNotificationService {
     ) as Promise<string>
   }
 
+}
+
+export class NotificationChannelSubscriptions {
+  private readonly channels = new Set<string>()
+
+  public get size(): number {
+    return this.channels.size
+  }
+
+  public clear(): void {
+    this.channels.clear()
+  }
+
+  public sync(
+    nextChannels: Set<string>,
+    subscribe: (channelID: string) => void,
+    unsubscribe: (channelID: string) => void,
+  ): void {
+    for (const channelID of nextChannels) {
+      if (this.channels.has(channelID)) continue
+      subscribe(channelID)
+      this.channels.add(channelID)
+    }
+    for (const channelID of this.channels) {
+      if (nextChannels.has(channelID)) continue
+      unsubscribe(channelID)
+      this.channels.delete(channelID)
+    }
+  }
 }
 
 export const canNotify = (channel: RavenChannel): boolean =>

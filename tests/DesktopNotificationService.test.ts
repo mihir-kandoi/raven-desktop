@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest"
-import { canNotify, notificationBody, realtimeOrigin } from "../src/DesktopNotificationService.js"
+import { describe, expect, it, vi } from "vitest"
+import {
+  canNotify,
+  NotificationChannelSubscriptions,
+  notificationBody,
+  realtimeOrigin,
+} from "../src/DesktopNotificationService.js"
 
 describe("desktop notification service", () => {
   it("subscribes to direct messages and opted-in member channels", () => {
@@ -17,5 +22,20 @@ describe("desktop notification service", () => {
   it("uses the bench socket port only for local origins", () => {
     expect(realtimeOrigin("http://raven.localhost:8002", 9002)).toBe("http://raven.localhost:9002")
     expect(realtimeOrigin("https://raven.example.com", 9002)).toBe("https://raven.example.com")
+  })
+
+  it("subscribes to channels again after a socket reconnect", () => {
+    const subscriptions = new NotificationChannelSubscriptions()
+    const subscribe = vi.fn()
+    const unsubscribe = vi.fn()
+    const channels = new Set(["general"])
+
+    subscriptions.sync(channels, subscribe, unsubscribe)
+    subscriptions.clear()
+    subscriptions.sync(channels, subscribe, unsubscribe)
+
+    expect(subscribe).toHaveBeenCalledTimes(2)
+    expect(subscribe).toHaveBeenLastCalledWith("general")
+    expect(unsubscribe).not.toHaveBeenCalled()
   })
 })
