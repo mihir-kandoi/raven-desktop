@@ -75,6 +75,8 @@ jobs:
           bench --site raven-test.localhost set-config allow_tests true
           bench build
       - name: Run Raven tests
+        id: raven-tests
+        continue-on-error: true
         working-directory: /home/runner/frappe-bench
         env:
           TYPE: server
@@ -100,3 +102,6 @@ jobs:
       - name: Show Bench log on failure
         if: failure()
         run: cat /tmp/raven-bench.log || true
+      - name: Report Raven test failure
+        if: steps.raven-tests.outcome == 'failure'
+        run: exit 1
